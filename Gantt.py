@@ -68,7 +68,7 @@ ROW_HEIGHT = 30
 SPACE_BETWEEN = 10
 MILESTONE_SIZE = 8
 TEXT_AREA_WIDTH = 50
-
+###
 # --- 1. Daten definieren ---
 tasks_data = [
     {'name': 'Kick-off Meeting', 'category': 'Klärungsphase', 'start': datetime.date(2025, 8, 26), 'end': datetime.date(2025, 8, 26), 'completion': 0},
