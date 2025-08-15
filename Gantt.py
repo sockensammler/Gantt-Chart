@@ -61,8 +61,8 @@ COLOR_YELLOW_PHASE = (255, 221, 0)
 # Layout
 TOTAL_IMAGE_WIDTH = 1800
 PADDING = 20
-HEADER_AREA_HEIGHT = 80 # NEU: Platz für den oberen Header
-TABLE_WIDTH = 440
+HEADER_AREA_HEIGHT = 80
+# TABLE_WIDTH = 440 # GEÄNDERT: Wird jetzt dynamisch berechnet
 HEADER_HEIGHT = 40
 ROW_HEIGHT = 30
 SPACE_BETWEEN = 10
@@ -71,28 +71,28 @@ TEXT_AREA_WIDTH = 50
 
 # --- 1. Daten definieren ---
 tasks_data = [
-    {'name': 'Kick-off Meeting', 'category': 'Klärungsphase', 'start': datetime.date(2025, 8, 26), 'end': datetime.date(2025, 8, 26), 'completion': 100},
-    {'name': 'Anforderungsanalyse & Spezifikation', 'category': 'Klärungsphase', 'start': datetime.date(2025, 8, 27), 'end': datetime.date(2025, 9, 10), 'completion': 100},
-    {'name': 'Mechanische Design', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 11), 'end': datetime.date(2026, 1, 22), 'completion': 75},
-    {'name': 'Elektrisches Design', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 11), 'end': datetime.date(2026, 1, 22), 'completion': 0},
-    {'name': 'SPS Automatisierung', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 12, 1), 'end': datetime.date(2026, 1, 22), 'completion': 40},
-    {'name': 'Testphase', 'category': 'Entwicklungsphase', 'start': datetime.date(2026, 1, 23), 'end': datetime.date(2026, 2, 23), 'completion': 25},
-    {'name': 'Nacharbeiten', 'category': 'Testphase', 'start': datetime.date(2026, 2, 24), 'end': datetime.date(2026, 3, 23), 'completion': 0},
-    {'name': 'Einbau bei Krones', 'category': 'Testphase', 'start': datetime.date(2026, 4, 1), 'end': datetime.date(2026, 4, 20), 'completion': 0}
+    {'name': 'Kick-off Meeting', 'category': 'Klärungsphase', 'start': datetime.date(2025, 8, 26), 'end': datetime.date(2025, 8, 26), 'completion': 0},
+    {'name': 'Anforderungsanalyse & Spezifikation', 'category': 'Klärungsphase', 'start': datetime.date(2025, 8, 27), 'end': datetime.date(2025, 9, 10), 'completion': 50},
+    {'name': 'Mechanische Design', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 11), 'end': datetime.date(2026, 1, 22), 'completion': 50},
+    {'name': 'Elektrisches Design', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 11), 'end': datetime.date(2026, 1, 22), 'completion': 50},
+    {'name': 'SPS Automatisierung', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 12, 1), 'end': datetime.date(2026, 1, 22), 'completion': 75},
+    {'name': 'Testphase', 'category': 'Entwicklungsphase', 'start': datetime.date(2026, 1, 23), 'end': datetime.date(2026, 2, 23), 'completion': 20},
+    {'name': 'Nacharbeiten', 'category': 'Testphase', 'start': datetime.date(2026, 2, 24), 'end': datetime.date(2026, 3, 23), 'completion': 25},
+    {'name': 'Integration bei Krones', 'category': 'Vor-Ort-Phase', 'start': datetime.date(2026, 4, 1), 'end': datetime.date(2026, 4, 20), 'completion': 0}
 ]
 
 milestones_data = [
     {'name': 'Auftragseingang', 'category': 'Klärungsphase', 'date': datetime.date(2025, 8, 25)},
     {'name': 'Bestätigung der Spezifikation durch Krones', 'category': 'Klärungsphase', 'date': datetime.date(2025, 9, 9)},
-    {'name': 'Design finalisiert', 'category': 'Entwicklungsphase', 'date': datetime.date(2026, 1, 22)},
-    {'name': 'Lieferbereitschaft', 'category': 'Testphase', 'date': datetime.date(2026, 3, 24)}
+    {'name': 'Bestätigung des Designs durch Krones', 'category': 'Entwicklungsphase', 'date': datetime.date(2026, 1, 22)},
+    {'name': 'Lieferbereitschaft', 'category': 'Testphase', 'date': datetime.date(2026, 3, 24)},
+    {'name': 'Finale Abnahme', 'category': 'Vor-Ort-Phase', 'date': datetime.date(2026, 4, 20)}
 ]
 
 # Daten für die Verarbeitung vorbereiten und gruppieren
 all_items = []
 for task in tasks_data:
     task['type'] = 'task'
-    # Dauer aus Start- und Enddatum berechnen
     task['duration'] = (task['end'] - task['start']).days + 1
     all_items.append(task)
 
@@ -115,6 +115,37 @@ for item in all_items:
 for category in categorized_items:
     categorized_items[category].sort(key=lambda x: x['start'])
 
+# --- NEU: Dynamische Spaltenbreite berechnen ---
+def get_text_width(text, font):
+    """Berechnet die Breite eines Textes für eine gegebene Schriftart."""
+    try:
+        # Moderne Pillow-Versionen
+        return font.getlength(text)
+    except AttributeError:
+        # Ältere Pillow-Versionen
+        return font.getsize(text)[0]
+
+max_name_width = 0
+# Berücksichtige auch die Überschrift bei der Breitenberechnung
+header_text = "Aufgabe / Meilenstein"
+header_width = get_text_width(header_text, FONT_BOLD)
+max_name_width = header_width
+
+# Finde die maximale Breite aus allen Aufgaben- und Meilensteinnamen
+for item in all_items:
+    font = FONT_ITALIC if item['type'] == 'milestone' else FONT_REGULAR
+    width = get_text_width(item['name'], font)
+    if width > max_name_width:
+        max_name_width = width
+
+# Definiere die Spaltenbreiten
+FIRST_COL_PADDING = 15  # Ein wenig Platz links und rechts vom Text
+FIRST_COL_WIDTH = int(max_name_width + FIRST_COL_PADDING * 2)
+START_COL_WIDTH = 100
+END_COL_WIDTH = 100
+TABLE_WIDTH = FIRST_COL_WIDTH + START_COL_WIDTH + END_COL_WIDTH
+
+
 # --- 2. Bilddimensionen berechnen ---
 project_start_date = min(item['start'] for item in all_items)
 project_end_date = max(item.get('end', item['start']) for item in all_items)
@@ -132,12 +163,9 @@ draw = ImageDraw.Draw(image)
 
 # --- Header-Bereich zeichnen ---
 header_y = PADDING
-
-# Oben Links: Projektinfo
 draw.text((PADDING, header_y + 10), "Projekt: Scheibensortierer Dizzy / P54122", font=FONT_BOLD, fill=COLOR_BLACK)
 draw.text((PADDING, header_y + 35), f"Datum: {datetime.date.today().strftime('%d.%m.%Y')}", font=FONT_REGULAR, fill=COLOR_BLACK)
 
-# Oben Rechts: Logo
 try:
     logo = Image.open("logo.png")
     logo_aspect_ratio = logo.width / logo.height
@@ -150,27 +178,19 @@ try:
 except FileNotFoundError:
     print("logo.png nicht gefunden. Logo wird nicht angezeigt.")
 
-# Oben Mitte: Legende
 legend_x = IMG_WIDTH / 2 - 180
 legend_y = header_y + 15
 legend_item_height = 20
 box_size = 12
-
-# Legende: Phase
 draw.rectangle([legend_x, legend_y, legend_x + box_size, legend_y + box_size], fill=COLOR_YELLOW_PHASE, outline=COLOR_BLACK)
 draw.text((legend_x + box_size + 5, legend_y - 2), "Phase", font=FONT_LEGEND, fill=COLOR_BLACK)
-
-# Legende: Aufgabe
 draw.rectangle([legend_x, legend_y + legend_item_height, legend_x + box_size, legend_y + legend_item_height + box_size], fill=COLOR_BLUE_PRIMARY, outline=COLOR_BLACK)
-draw.rectangle([legend_x, legend_y + legend_item_height, legend_x + box_size/2, legend_y + legend_item_height + box_size], fill=COLOR_BLUE_DARK) # Fortschritt andeuten
+draw.rectangle([legend_x, legend_y + legend_item_height, legend_x + box_size/2, legend_y + legend_item_height + box_size], fill=COLOR_BLUE_DARK)
 draw.text((legend_x + box_size + 5, legend_y + legend_item_height - 2), "Aufgabe mit Fortschritt", font=FONT_LEGEND, fill=COLOR_BLACK)
-
-# Legende: Meilenstein
 points = [(legend_x + box_size/2, legend_y + 2*legend_item_height), (legend_x + box_size, legend_y + 2*legend_item_height + box_size/2),
           (legend_x + box_size/2, legend_y + 2*legend_item_height + box_size), (legend_x, legend_y + 2*legend_item_height + box_size/2)]
 draw.polygon(points, fill=COLOR_RED_MILESTONE, outline=COLOR_BLACK)
 draw.text((legend_x + box_size + 5, legend_y + 2*legend_item_height - 2), "Meilenstein", font=FONT_LEGEND, fill=COLOR_BLACK)
-
 
 # --- 4. Tabelle und Diagramm-Hintergrund zeichnen ---
 table_y = PADDING + HEADER_AREA_HEIGHT
@@ -180,14 +200,12 @@ chart_y = table_y
 
 # Globale Überschriften
 draw.rectangle([table_x, table_y, table_x + TABLE_WIDTH, table_y + HEADER_HEIGHT], fill=COLOR_HEADER_BG)
-draw.text((table_x + 5, table_y + 12), "Aufgabe / Meilenstein", font=FONT_BOLD, fill=COLOR_BLACK)
-draw.text((table_x + 230, table_y + 12), "Start", font=FONT_BOLD, fill=COLOR_BLACK)
-draw.text((table_x + 340, table_y + 12), "Ende", font=FONT_BOLD, fill=COLOR_BLACK)
+draw.text((table_x + FIRST_COL_PADDING, table_y + 12), header_text, font=FONT_BOLD, fill=COLOR_BLACK) # GEÄNDERT
+draw.text((table_x + FIRST_COL_WIDTH + 20, table_y + 12), "Start", font=FONT_BOLD, fill=COLOR_BLACK) # GEÄNDERT
+draw.text((table_x + FIRST_COL_WIDTH + START_COL_WIDTH + 20, table_y + 12), "Ende", font=FONT_BOLD, fill=COLOR_BLACK) # GEÄNDERT
 
-# KORREKTUR: Hintergrund für Chart-Kopfzeile
 draw.rectangle([chart_x, chart_y, chart_x + CHART_WIDTH + TEXT_AREA_WIDTH, chart_y + HEADER_HEIGHT], fill=COLOR_HEADER_BG)
 
-# Zeitachsen-Überschriften (Monat und KW)
 current_date = project_start_date
 while current_date <= project_end_date:
     if current_date.day == 1:
@@ -199,27 +217,22 @@ while current_date <= project_end_date:
         draw.text((line_x + 3, chart_y + 25), f"KW{week_num}", font=FONT_CHART_WEEK_BOLD, fill=COLOR_BLACK)
     current_date += timedelta(days=1)
 
-# Kategorien und Einträge durchlaufen
 current_y = table_y + HEADER_HEIGHT
 category_index = 0
 for category_name in category_order:
     category_items = categorized_items[category_name]
     
-    # Kategorie-Überschrift in der Tabelle
     draw.rectangle([table_x, current_y, table_x + TABLE_WIDTH, current_y + ROW_HEIGHT], fill=COLOR_CATEGORY_BG)
     draw.text((table_x + 5, current_y + 8), category_name, font=FONT_BOLD, fill=COLOR_BLACK)
     
-    # Phasen-Balken im Diagramm zeichnen
     phase_start_date = min(item['start'] for item in category_items)
     phase_end_date = max(item.get('end', item['start']) for item in category_items)
     phase_duration_days = (phase_end_date - phase_start_date).days + 1
-    
     start_offset = (phase_start_date - project_start_date).days * pixels_per_day
     bar_width = phase_duration_days * pixels_per_day
     bar_x = chart_x + start_offset
     draw.rectangle([bar_x, current_y + 5, bar_x + bar_width, current_y + ROW_HEIGHT - 5], fill=COLOR_YELLOW_PHASE, outline=COLOR_BLACK)
     
-    # Hintergrund für die Zeilen der Kategorie im Chart
     bg_color = COLOR_GREY_LIGHT if category_index % 2 == 0 else COLOR_GREY_DARK
     chart_bg_y_start = current_y + ROW_HEIGHT
     chart_bg_y_end = chart_bg_y_start + len(category_items) * ROW_HEIGHT
@@ -227,16 +240,13 @@ for category_name in category_order:
     
     current_y += ROW_HEIGHT
     
-    # Einträge der Kategorie zeichnen
     for item in category_items:
-        # Tabellenzeile
         draw.rectangle([table_x, current_y, table_x + TABLE_WIDTH, current_y + ROW_HEIGHT], outline=COLOR_GREY_MEDIUM)
         if item['type'] == 'task':
             draw.text((table_x + 5, current_y + 8), item['name'], font=FONT_REGULAR, fill=COLOR_BLACK)
-            draw.text((table_x + 230, current_y + 8), item['start'].strftime('%d.%m.%Y'), font=FONT_REGULAR, fill=COLOR_BLACK)
-            draw.text((table_x + 340, current_y + 8), item['end'].strftime('%d.%m.%Y'), font=FONT_REGULAR, fill=COLOR_BLACK)
+            draw.text((table_x + FIRST_COL_WIDTH, current_y + 8), item['start'].strftime('%d.%m.%Y'), font=FONT_REGULAR, fill=COLOR_BLACK) # GEÄNDERT
+            draw.text((table_x + FIRST_COL_WIDTH + START_COL_WIDTH, current_y + 8), item['end'].strftime('%d.%m.%Y'), font=FONT_REGULAR, fill=COLOR_BLACK) # GEÄNDERT
             
-            # Aufgabenbalken im Chart
             start_offset = (item['start'] - project_start_date).days * pixels_per_day
             bar_width = item['duration'] * pixels_per_day
             bar_x = chart_x + start_offset
@@ -250,9 +260,8 @@ for category_name in category_order:
 
         elif item['type'] == 'milestone':
             draw.text((table_x + 5, current_y + 8), item['name'], font=FONT_ITALIC, fill=COLOR_BLACK)
-            draw.text((table_x + 230, current_y + 8), item['date'].strftime('%d.%m.%Y'), font=FONT_REGULAR, fill=COLOR_BLACK)
+            draw.text((table_x + FIRST_COL_WIDTH, current_y + 8), item['date'].strftime('%d.%m.%Y'), font=FONT_REGULAR, fill=COLOR_BLACK) # GEÄNDERT
             
-            # Meilenstein-Raute im Chart
             offset = (item['date'] - project_start_date).days * pixels_per_day
             center_x = chart_x + offset
             center_y = current_y + (ROW_HEIGHT / 2)
@@ -266,14 +275,13 @@ for category_name in category_order:
 # --- 5. Vordergründige Wochenlinien zeichnen (gestrichelt) ---
 current_date = project_start_date
 while current_date <= project_end_date:
-    if current_date.weekday() == 0: # Montag
+    if current_date.weekday() == 0:
         line_x = chart_x + ((current_date - project_start_date).days * pixels_per_day)
         line_y_start = chart_y + HEADER_HEIGHT
         line_y_end = IMG_HEIGHT - PADDING
         
-        # Gestrichelte Linie manuell zeichnen
-        for y in range(line_y_start, line_y_end, 10): # 10 = Strichlänge + Lücke
-            draw.line([(line_x, y), (line_x, y + 5)], fill=COLOR_GREY_MEDIUM, width=1) # 5 = Strichlänge
+        for y in range(line_y_start, line_y_end, 10):
+            draw.line([(line_x, y), (line_x, y + 5)], fill=COLOR_GREY_MEDIUM, width=1)
             
     current_date += timedelta(days=1)
 
