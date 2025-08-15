@@ -65,27 +65,27 @@ HEADER_AREA_HEIGHT = 80 # NEU: Platz für den oberen Header
 TABLE_WIDTH = 440
 HEADER_HEIGHT = 40
 ROW_HEIGHT = 30
-SPACE_BETWEEN = 0
+SPACE_BETWEEN = 10
 MILESTONE_SIZE = 8
 TEXT_AREA_WIDTH = 50
 
 # --- 1. Daten definieren ---
 tasks_data = [
-    {'name': 'Kick-off Meeting', 'category': 'Klärungsphase', 'start': datetime.date(2025, 9, 1), 'end': datetime.date(2025, 9, 1), 'completion': 100},
-    {'name': 'Anforderungsanalyse & Spezifikation', 'category': 'Klärungsphase', 'start': datetime.date(2025, 9, 2), 'end': datetime.date(2025, 9, 8), 'completion': 100},
-    {'name': 'Mechanische Design', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 9), 'end': datetime.date(2025, 9, 19), 'completion': 75},
-    {'name': 'Elektrisches Design', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 22), 'end': datetime.date(2025, 9, 23), 'completion': 0},
-    {'name': 'SPS Automatisierung', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 24), 'end': datetime.date(2025, 10, 10), 'completion': 40},
-    {'name': 'Testphase', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 24), 'end': datetime.date(2025, 10, 15), 'completion': 25},
-    {'name': 'Nacharbeiten', 'category': 'Testphase', 'start': datetime.date(2025, 10, 16), 'end': datetime.date(2025, 10, 24), 'completion': 0},
-    {'name': 'Einbau bei Krones', 'category': 'Testphase', 'start': datetime.date(2025, 10, 27), 'end': datetime.date(2025, 10, 27), 'completion': 0}
+    {'name': 'Kick-off Meeting', 'category': 'Klärungsphase', 'start': datetime.date(2025, 8, 26), 'end': datetime.date(2025, 8, 26), 'completion': 100},
+    {'name': 'Anforderungsanalyse & Spezifikation', 'category': 'Klärungsphase', 'start': datetime.date(2025, 8, 27), 'end': datetime.date(2025, 9, 10), 'completion': 100},
+    {'name': 'Mechanische Design', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 11), 'end': datetime.date(2026, 1, 22), 'completion': 75},
+    {'name': 'Elektrisches Design', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 11), 'end': datetime.date(2026, 1, 22), 'completion': 0},
+    {'name': 'SPS Automatisierung', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 12, 1), 'end': datetime.date(2026, 1, 22), 'completion': 40},
+    {'name': 'Testphase', 'category': 'Entwicklungsphase', 'start': datetime.date(2026, 1, 23), 'end': datetime.date(2026, 2, 23), 'completion': 25},
+    {'name': 'Nacharbeiten', 'category': 'Testphase', 'start': datetime.date(2026, 2, 24), 'end': datetime.date(2026, 3, 23), 'completion': 0},
+    {'name': 'Einbau bei Krones', 'category': 'Testphase', 'start': datetime.date(2026, 4, 1), 'end': datetime.date(2026, 4, 20), 'completion': 0}
 ]
 
 milestones_data = [
     {'name': 'Auftragseingang', 'category': 'Klärungsphase', 'date': datetime.date(2025, 8, 25)},
     {'name': 'Bestätigung der Spezifikation durch Krones', 'category': 'Klärungsphase', 'date': datetime.date(2025, 9, 9)},
-    {'name': 'Design finalisiert', 'category': 'Entwicklungsphase', 'date': datetime.date(2025, 9, 23)},
-    {'name': 'Lieferbereitschaft', 'category': 'Entwicklungsphase', 'date': datetime.date(2025, 10, 15)}
+    {'name': 'Design finalisiert', 'category': 'Entwicklungsphase', 'date': datetime.date(2026, 1, 22)},
+    {'name': 'Lieferbereitschaft', 'category': 'Testphase', 'date': datetime.date(2026, 3, 24)}
 ]
 
 # Daten für die Verarbeitung vorbereiten und gruppieren
@@ -134,7 +134,7 @@ draw = ImageDraw.Draw(image)
 header_y = PADDING
 
 # Oben Links: Projektinfo
-draw.text((PADDING, header_y + 10), "Projekt: Website Relaunch", font=FONT_BOLD, fill=COLOR_BLACK)
+draw.text((PADDING, header_y + 10), "Projekt: Scheibensortierer Dizzy / P54122", font=FONT_BOLD, fill=COLOR_BLACK)
 draw.text((PADDING, header_y + 35), f"Datum: {datetime.date.today().strftime('%d.%m.%Y')}", font=FONT_REGULAR, fill=COLOR_BLACK)
 
 # Oben Rechts: Logo
