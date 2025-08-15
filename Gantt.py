@@ -54,6 +54,7 @@ COLOR_BLUE_DARK = (40, 120, 180)
 COLOR_HEADER_BG = (230, 230, 230)
 COLOR_CATEGORY_BG = (200, 200, 200)
 COLOR_RED_MILESTONE = (255, 99, 132)
+COLOR_YELLOW_PHASE = (255, 221, 0) # KORRIGIERT: Farbe für Phasenbalken
 
 # Layout
 TOTAL_IMAGE_WIDTH = 1800
@@ -150,20 +151,32 @@ while current_date <= project_end_date:
 current_y = table_y + HEADER_HEIGHT
 category_index = 0
 for category_name in category_order:
-    # Kategorie-Überschrift
+    category_items = categorized_items[category_name]
+    
+    # Kategorie-Überschrift in der Tabelle
     draw.rectangle([table_x, current_y, table_x + TABLE_WIDTH, current_y + ROW_HEIGHT], fill=COLOR_CATEGORY_BG)
     draw.text((table_x + 5, current_y + 8), category_name, font=FONT_BOLD, fill=COLOR_BLACK)
     
-    # Hintergrund für Kategorie im Chart
+    # Phasen-Balken im Diagramm zeichnen
+    phase_start_date = min(item['start'] for item in category_items)
+    phase_end_date = max(item.get('end', item['start']) for item in category_items)
+    phase_duration_days = (phase_end_date - phase_start_date).days + 1
+    
+    start_offset = (phase_start_date - project_start_date).days * pixels_per_day
+    bar_width = phase_duration_days * pixels_per_day
+    bar_x = chart_x + start_offset
+    draw.rectangle([bar_x, current_y + 5, bar_x + bar_width, current_y + ROW_HEIGHT - 5], fill=COLOR_YELLOW_PHASE, outline=COLOR_BLACK)
+    
+    # Hintergrund für die Zeilen der Kategorie im Chart
     bg_color = COLOR_GREY_LIGHT if category_index % 2 == 0 else COLOR_GREY_DARK
     chart_bg_y_start = current_y + ROW_HEIGHT
-    chart_bg_y_end = chart_bg_y_start + len(categorized_items[category_name]) * ROW_HEIGHT
+    chart_bg_y_end = chart_bg_y_start + len(category_items) * ROW_HEIGHT
     draw.rectangle([chart_x, chart_bg_y_start, chart_x + CHART_WIDTH + TEXT_AREA_WIDTH, chart_bg_y_end], fill=bg_color)
     
     current_y += ROW_HEIGHT
     
     # Einträge der Kategorie zeichnen
-    for item in categorized_items[category_name]:
+    for item in category_items:
         # Tabellenzeile
         draw.rectangle([table_x, current_y, table_x + TABLE_WIDTH, current_y + ROW_HEIGHT], outline=COLOR_GREY_MEDIUM)
         if item['type'] == 'task':
