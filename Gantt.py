@@ -35,6 +35,7 @@ if FONT_REGULAR_PATH:
     FONT_ITALIC = ImageFont.truetype(FONT_ITALIC_PATH or FONT_REGULAR_PATH, 12)
     FONT_CHART_HEADER = ImageFont.truetype(FONT_REGULAR_PATH, 11)
     FONT_CHART_WEEK = ImageFont.truetype(FONT_REGULAR_PATH, 9)
+    FONT_LEGEND = ImageFont.truetype(FONT_REGULAR_PATH, 11)
 else:
     print("Warnung: Keine passende Schriftart gefunden, die Umlaute unterstützt. Verwende Standard-Schriftart.")
     FONT_BOLD = ImageFont.load_default()
@@ -42,6 +43,7 @@ else:
     FONT_ITALIC = FONT_REGULAR
     FONT_CHART_HEADER = ImageFont.load_default()
     FONT_CHART_WEEK = ImageFont.load_default()
+    FONT_LEGEND = ImageFont.load_default()
 
 # Farben
 COLOR_WHITE = (255, 255, 255)
@@ -54,11 +56,12 @@ COLOR_BLUE_DARK = (40, 120, 180)
 COLOR_HEADER_BG = (230, 230, 230)
 COLOR_CATEGORY_BG = (200, 200, 200)
 COLOR_RED_MILESTONE = (255, 99, 132)
-COLOR_YELLOW_PHASE = (255, 221, 0) # KORRIGIERT: Farbe für Phasenbalken
+COLOR_YELLOW_PHASE = (255, 221, 0)
 
 # Layout
 TOTAL_IMAGE_WIDTH = 1800
 PADDING = 20
+HEADER_AREA_HEIGHT = 80 # NEU: Platz für den oberen Header
 TABLE_WIDTH = 440
 HEADER_HEIGHT = 40
 ROW_HEIGHT = 30
@@ -117,15 +120,58 @@ project_duration_days = (project_end_date - project_start_date).days + 1
 CHART_WIDTH = TOTAL_IMAGE_WIDTH - (PADDING * 2 + TABLE_WIDTH + SPACE_BETWEEN + TEXT_AREA_WIDTH)
 pixels_per_day = CHART_WIDTH / project_duration_days
 
-IMG_HEIGHT = PADDING * 2 + HEADER_HEIGHT + (len(all_items) + len(category_order)) * ROW_HEIGHT
+IMG_HEIGHT = PADDING * 2 + HEADER_AREA_HEIGHT + HEADER_HEIGHT + (len(all_items) + len(category_order)) * ROW_HEIGHT
 IMG_WIDTH = TOTAL_IMAGE_WIDTH
 
 # --- 3. Bild-Leinwand erstellen ---
 image = Image.new('RGB', (int(IMG_WIDTH), IMG_HEIGHT), COLOR_WHITE)
 draw = ImageDraw.Draw(image)
 
+# --- NEU: Header-Bereich zeichnen ---
+header_y = PADDING
+
+# Oben Links: Projektinfo
+draw.text((PADDING, header_y + 10), "Projekt: Website Relaunch", font=FONT_BOLD, fill=COLOR_BLACK)
+draw.text((PADDING, header_y + 35), f"Datum: {datetime.date.today().strftime('%d.%m.%Y')}", font=FONT_REGULAR, fill=COLOR_BLACK)
+
+# Oben Rechts: Logo
+try:
+    logo = Image.open("logo.png")
+    logo_aspect_ratio = logo.width / logo.height
+    logo_height = 60
+    logo_width = int(logo_height * logo_aspect_ratio)
+    logo = logo.resize((logo_width, logo_height))
+    logo_x = IMG_WIDTH - PADDING - logo_width
+    logo_y = header_y + 5
+    image.paste(logo, (logo_x, logo_y), logo)
+except FileNotFoundError:
+    print("logo.png nicht gefunden. Logo wird nicht angezeigt.")
+
+# Oben Mitte: Legende
+legend_x = IMG_WIDTH / 2 - 180
+legend_y = header_y + 15
+legend_item_height = 20
+box_size = 12
+
+# Legende: Phase
+draw.rectangle([legend_x, legend_y, legend_x + box_size, legend_y + box_size], fill=COLOR_YELLOW_PHASE, outline=COLOR_BLACK)
+draw.text((legend_x + box_size + 5, legend_y - 2), "Phase", font=FONT_LEGEND, fill=COLOR_BLACK)
+
+# Legende: Aufgabe
+draw.rectangle([legend_x, legend_y + legend_item_height, legend_x + box_size, legend_y + legend_item_height + box_size], fill=COLOR_BLUE_PRIMARY, outline=COLOR_BLACK)
+draw.rectangle([legend_x, legend_y + legend_item_height, legend_x + box_size/2, legend_y + legend_item_height + box_size], fill=COLOR_BLUE_DARK) # Fortschritt andeuten
+draw.text((legend_x + box_size + 5, legend_y + legend_item_height - 2), "Aufgabe mit Fortschritt", font=FONT_LEGEND, fill=COLOR_BLACK)
+
+# Legende: Meilenstein
+points = [(legend_x + box_size/2, legend_y + 2*legend_item_height), (legend_x + box_size, legend_y + 2*legend_item_height + box_size/2),
+          (legend_x + box_size/2, legend_y + 2*legend_item_height + box_size), (legend_x, legend_y + 2*legend_item_height + box_size/2)]
+draw.polygon(points, fill=COLOR_RED_MILESTONE, outline=COLOR_BLACK)
+draw.text((legend_x + box_size + 5, legend_y + 2*legend_item_height - 2), "Meilenstein", font=FONT_LEGEND, fill=COLOR_BLACK)
+
+
 # --- 4. Tabelle und Diagramm-Hintergrund zeichnen ---
-table_x, table_y = PADDING, PADDING
+table_y = PADDING + HEADER_AREA_HEIGHT
+table_x = PADDING
 chart_x = table_x + TABLE_WIDTH + SPACE_BETWEEN
 chart_y = table_y
 
