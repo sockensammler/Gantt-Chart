@@ -33,16 +33,16 @@ if FONT_REGULAR_PATH:
     FONT_BOLD = ImageFont.truetype(FONT_BOLD_PATH or FONT_REGULAR_PATH, 14)
     FONT_REGULAR = ImageFont.truetype(FONT_REGULAR_PATH, 12)
     FONT_ITALIC = ImageFont.truetype(FONT_ITALIC_PATH or FONT_REGULAR_PATH, 12)
-    FONT_CHART_HEADER = ImageFont.truetype(FONT_REGULAR_PATH, 11)
-    FONT_CHART_WEEK = ImageFont.truetype(FONT_REGULAR_PATH, 9)
+    FONT_CHART_HEADER_BOLD = ImageFont.truetype(FONT_BOLD_PATH or FONT_REGULAR_PATH, 11)
+    FONT_CHART_WEEK_BOLD = ImageFont.truetype(FONT_BOLD_PATH or FONT_REGULAR_PATH, 9)
     FONT_LEGEND = ImageFont.truetype(FONT_REGULAR_PATH, 11)
 else:
     print("Warnung: Keine passende Schriftart gefunden, die Umlaute unterstützt. Verwende Standard-Schriftart.")
     FONT_BOLD = ImageFont.load_default()
     FONT_REGULAR = ImageFont.load_default()
     FONT_ITALIC = FONT_REGULAR
-    FONT_CHART_HEADER = ImageFont.load_default()
-    FONT_CHART_WEEK = ImageFont.load_default()
+    FONT_CHART_HEADER_BOLD = FONT_BOLD
+    FONT_CHART_WEEK_BOLD = FONT_BOLD
     FONT_LEGEND = ImageFont.load_default()
 
 # Farben
@@ -71,14 +71,14 @@ TEXT_AREA_WIDTH = 50
 
 # --- 1. Daten definieren ---
 tasks_data = [
-    {'name': 'Kick-off Meeting', 'category': 'Klärungsphase', 'start': datetime.date(2025, 9, 1), 'duration': 1, 'completion': 100},
-    {'name': 'Anforderungsanalyse', 'category': 'Klärungsphase', 'start': datetime.date(2025, 9, 2), 'duration': 7, 'completion': 100},
-    {'name': 'Design-Entwurf', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 9), 'duration': 11, 'completion': 75},
-    {'name': 'Design-Abnahme', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 22), 'duration': 2, 'completion': 0},
-    {'name': 'Frontend-Entwicklung', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 24), 'duration': 17, 'completion': 40},
-    {'name': 'Backend-Entwicklung', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 24), 'duration': 22, 'completion': 25},
-    {'name': 'Testing & QA', 'category': 'Testphase', 'start': datetime.date(2025, 10, 16), 'duration': 9, 'completion': 0},
-    {'name': 'Go-Live', 'category': 'Testphase', 'start': datetime.date(2025, 10, 27), 'duration': 1, 'completion': 0}
+    {'name': 'Kick-off Meeting', 'category': 'Klärungsphase', 'start': datetime.date(2025, 9, 1), 'end': datetime.date(2025, 9, 1), 'completion': 100},
+    {'name': 'Anforderungsanalyse', 'category': 'Klärungsphase', 'start': datetime.date(2025, 9, 2), 'end': datetime.date(2025, 9, 8), 'completion': 100},
+    {'name': 'Design-Entwurf', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 9), 'end': datetime.date(2025, 9, 19), 'completion': 75},
+    {'name': 'Design-Abnahme', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 22), 'end': datetime.date(2025, 9, 23), 'completion': 0},
+    {'name': 'Frontend-Entwicklung', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 24), 'end': datetime.date(2025, 10, 10), 'completion': 40},
+    {'name': 'Backend-Entwicklung', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 24), 'end': datetime.date(2025, 10, 15), 'completion': 25},
+    {'name': 'Testing & QA', 'category': 'Testphase', 'start': datetime.date(2025, 10, 16), 'end': datetime.date(2025, 10, 24), 'completion': 0},
+    {'name': 'Go-Live', 'category': 'Testphase', 'start': datetime.date(2025, 10, 27), 'end': datetime.date(2025, 10, 27), 'completion': 0}
 ]
 
 milestones_data = [
@@ -90,7 +90,8 @@ milestones_data = [
 all_items = []
 for task in tasks_data:
     task['type'] = 'task'
-    task['end'] = task['start'] + timedelta(days=task['duration'] - 1)
+    # Dauer aus Start- und Enddatum berechnen
+    task['duration'] = (task['end'] - task['start']).days + 1
     all_items.append(task)
 
 for milestone in milestones_data:
@@ -127,7 +128,7 @@ IMG_WIDTH = TOTAL_IMAGE_WIDTH
 image = Image.new('RGB', (int(IMG_WIDTH), IMG_HEIGHT), COLOR_WHITE)
 draw = ImageDraw.Draw(image)
 
-# --- NEU: Header-Bereich zeichnen ---
+# --- Header-Bereich zeichnen ---
 header_y = PADDING
 
 # Oben Links: Projektinfo
@@ -181,16 +182,19 @@ draw.text((table_x + 5, table_y + 12), "Aufgabe / Meilenstein", font=FONT_BOLD, 
 draw.text((table_x + 230, table_y + 12), "Start", font=FONT_BOLD, fill=COLOR_BLACK)
 draw.text((table_x + 340, table_y + 12), "Ende", font=FONT_BOLD, fill=COLOR_BLACK)
 
+# KORREKTUR: Hintergrund für Chart-Kopfzeile
+draw.rectangle([chart_x, chart_y, chart_x + CHART_WIDTH + TEXT_AREA_WIDTH, chart_y + HEADER_HEIGHT], fill=COLOR_HEADER_BG)
+
 # Zeitachsen-Überschriften (Monat und KW)
 current_date = project_start_date
 while current_date <= project_end_date:
     if current_date.day == 1:
         month_start_x = chart_x + ((current_date - project_start_date).days * pixels_per_day)
-        draw.text((month_start_x + 5, chart_y + 5), current_date.strftime('%B %Y'), font=FONT_CHART_HEADER, fill=COLOR_BLACK)
+        draw.text((month_start_x + 5, chart_y + 5), current_date.strftime('%B %Y'), font=FONT_CHART_HEADER_BOLD, fill=COLOR_BLACK)
     if current_date.weekday() == 0:
         line_x = chart_x + ((current_date - project_start_date).days * pixels_per_day)
         week_num = current_date.isocalendar()[1]
-        draw.text((line_x + 3, chart_y + 25), f"KW{week_num}", font=FONT_CHART_WEEK, fill=COLOR_BLACK)
+        draw.text((line_x + 3, chart_y + 25), f"KW{week_num}", font=FONT_CHART_WEEK_BOLD, fill=COLOR_BLACK)
     current_date += timedelta(days=1)
 
 # Kategorien und Einträge durchlaufen
