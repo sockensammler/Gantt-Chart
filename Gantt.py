@@ -72,18 +72,20 @@ TEXT_AREA_WIDTH = 50
 # --- 1. Daten definieren ---
 tasks_data = [
     {'name': 'Kick-off Meeting', 'category': 'Klärungsphase', 'start': datetime.date(2025, 9, 1), 'end': datetime.date(2025, 9, 1), 'completion': 100},
-    {'name': 'Anforderungsanalyse', 'category': 'Klärungsphase', 'start': datetime.date(2025, 9, 2), 'end': datetime.date(2025, 9, 8), 'completion': 100},
-    {'name': 'Design-Entwurf', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 9), 'end': datetime.date(2025, 9, 19), 'completion': 75},
-    {'name': 'Design-Abnahme', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 22), 'end': datetime.date(2025, 9, 23), 'completion': 0},
-    {'name': 'Frontend-Entwicklung', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 24), 'end': datetime.date(2025, 10, 10), 'completion': 40},
-    {'name': 'Backend-Entwicklung', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 24), 'end': datetime.date(2025, 10, 15), 'completion': 25},
-    {'name': 'Testing & QA', 'category': 'Testphase', 'start': datetime.date(2025, 10, 16), 'end': datetime.date(2025, 10, 24), 'completion': 0},
-    {'name': 'Go-Live', 'category': 'Testphase', 'start': datetime.date(2025, 10, 27), 'end': datetime.date(2025, 10, 27), 'completion': 0}
+    {'name': 'Anforderungsanalyse & Spezifikation', 'category': 'Klärungsphase', 'start': datetime.date(2025, 9, 2), 'end': datetime.date(2025, 9, 8), 'completion': 100},
+    {'name': 'Mechanische Design', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 9), 'end': datetime.date(2025, 9, 19), 'completion': 75},
+    {'name': 'Elektrisches Design', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 22), 'end': datetime.date(2025, 9, 23), 'completion': 0},
+    {'name': 'SPS Automatisierung', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 24), 'end': datetime.date(2025, 10, 10), 'completion': 40},
+    {'name': 'Testphase', 'category': 'Entwicklungsphase', 'start': datetime.date(2025, 9, 24), 'end': datetime.date(2025, 10, 15), 'completion': 25},
+    {'name': 'Nacharbeiten', 'category': 'Testphase', 'start': datetime.date(2025, 10, 16), 'end': datetime.date(2025, 10, 24), 'completion': 0},
+    {'name': 'Einbau bei Krones', 'category': 'Testphase', 'start': datetime.date(2025, 10, 27), 'end': datetime.date(2025, 10, 27), 'completion': 0}
 ]
 
 milestones_data = [
+    {'name': 'Auftragseingang', 'category': 'Klärungsphase', 'date': datetime.date(2025, 8, 25)},
+    {'name': 'Bestätigung der Spezifikation durch Krones', 'category': 'Klärungsphase', 'date': datetime.date(2025, 9, 9)},
     {'name': 'Design finalisiert', 'category': 'Entwicklungsphase', 'date': datetime.date(2025, 9, 23)},
-    {'name': 'Alpha-Version fertig', 'category': 'Entwicklungsphase', 'date': datetime.date(2025, 10, 15)}
+    {'name': 'Lieferbereitschaft', 'category': 'Entwicklungsphase', 'date': datetime.date(2025, 10, 15)}
 ]
 
 # Daten für die Verarbeitung vorbereiten und gruppieren
